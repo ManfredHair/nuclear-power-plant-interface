@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NUCLEAR CONTROL SYSTEM v1.84</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #00ff00;
+            font-family: "Courier New", monospace;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: #222;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 3px solid #666;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+        }
+        
+        .status-panel {
+            width: 25%;
+            background-color: #111;
+            border-right: 2px solid #444;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .status-indicator {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #00ff00;
+        }
+        
+        .indicator-light {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+            animation: blink 1.5s infinite;
+        }
+        
+        .red-light {
+            background-color: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        
+        .yellow-light {
+            background-color: #ffff00;
+            box-shadow: 0 0 10px #ffff00;
+        }
+        
+        .reactor-display {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .reactor-schematic {
+            flex: 1;
+            border: 2px solid #00ff00;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-panel {
+            height: 150px;
+            border: 2px solid #00ff00;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .control-button {
+            width: 60px;
+            height: 60px;
+            background-color: #333;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            margin: 5px;
+            color: #00ff00;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .control-button:hover {
+            background-color: #444;
+            box-shadow: 0 0 15px #00ff00;
+        }
+        
+        .emergency-button {
+            width: 80px;
+            height: 80px;
+            background-color: #660000;
+            border: 3px solid #ff0000;
+            border-radius: 50%;
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow: 0 0 10px #ff0000;
+            cursor: pointer;
+        }
+        
+        .emergency-button:hover {
+            background-color: #990000;
+            box-shadow: 0 0 20px #ff0000;
+        }
+        
+        .monitor {
+            width: 80%;
+            height: 80%;
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            background-color: #001100;
+            border: 3px solid #006600;
+            overflow: hidden;
+        }
+        
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background-color: rgba(0, 255, 0, 0.2);
+            position: absolute;
+            animation: scan 8s linear infinite;
+        }
+        
+        .reactor-core {
+            position: absolute;
+            width: 150px;
+            height: 250px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #00ff00;
+        }
+        
+        .cooling-tower {
+            position: absolute;
+            width: 60px;
+            height: 120px;
+            border: 2px solid #00ff00;
+        }
+        
+        .tower-left {
+            top: 30%;
+            left: 20%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .tower-right {
+            top: 30%;
+            left: 80%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .pipe {
+            position: absolute;
+            background-color: #00ff00;
+        }
+        
+        .horizontal-pipe {
+            height: 4px;
+        }
+        
+        .vertical-pipe {
+            width: 4px;
+        }
+        
+        .data-readout {
+            position: absolute;
+            border: 1px solid #00ff00;
+            background-color: rgba(0, 20, 0, 0.7);
+            padding: 5px;
+            font-size: 12px;
+        }
+        
+        .blinking-text {
+            animation: blink-text 1s infinite;
+        }
+        
+        .status-bar {
+            height: 30px;
+            background-color: #222;
+            border-top: 2px solid #444;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+        
+        .status-bar div {
+            display: flex;
+            align-items: center;
+        }
+        
+        .meter {
+            width: 100px;
+            height: 20px;
+            background-color: #333;
+            border: 1px solid #00ff00;
+            margin: 0 10px;
+            position: relative;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            background-color: #00ff00;
+            width: 75%;
+        }
+        
+        .grid-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        
+        .grid-line {
+            position: absolute;
+            background-color: rgba(0, 255, 0, 0.2);
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes blink-text {
+            0% { opacity: 1; }
+            49% { opacity: 1; }
+            50% { opacity: 0; }
+            99% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        .radiation-symbol {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .console-output {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 150px;
+            height: 100px;
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid #00ff00;
+            padding: 5px;
+            font-size: 10px;
+            overflow: hidden;
+        }
+        
+        #time-display {
+            margin-right: 15px;
+        }
+        
+        #status-display {
+            margin-left: 15px;
+            animation: blink-text 2s infinite;
+        }
+        
+        /* Emergency event styles */
+        .emergency-mode {
+            animation: flash-red 0.5s infinite;
+        }
+        
+        @keyframes flash-red {
+            0% { background-color: #000; }
+            50% { background-color: rgba(255, 0, 0, 0.3); }
+            100% { background-color: #000; }
+        }
+        
+        .status-alert {
+            color: #ff0000 !important;
+            animation: blink-text 0.3s infinite !important;
+        }
+        
+        .indicator-emergency {
+            animation: blink 0.3s infinite !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NUCLEAR CONTROL SYSTEM v1.84</h1>
+            <h3>REACTOR UNIT 4 - OPERATOR TERMINAL</h3>
+        </div>
+        
+        <div class="main-content">
+            <div class="status-panel">
+                <h3>== SYSTEM STATUS ==</h3>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light"></div>
+                    CORE TEMPERATURE: NOMINAL
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light"></div>
+                    COOLING SYSTEMS: ONLINE
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light yellow-light"></div>
+                    PRESSURE LEVELS: ELEVATED
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light"></div>
+                    POWER OUTPUT: 87.3%
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light"></div>
+                    CONTROL RODS: STABLE
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light"></div>
+                    RADIATION LEVELS: NORMAL
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light red-light"></div>
+                    TURBINE 2: MAINTENANCE
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light"></div>
+                    BACKUP SYSTEMS: READY
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="indicator-light"></div>
+                    SECURITY STATUS: GAMMA
+                </div>
+            </div>
+            
+            <div class="reactor-display">
+                <div class="reactor-schematic">
+                    <div class="monitor">
+                        <div class="scanline"></div>
+                        
+                        <!-- Grid lines -->
+                        <div class="grid-lines">
+                            <!-- Vertical lines -->
+                            <div class="grid-line vertical-pipe" style="left: 10%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 20%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 30%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 40%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 50%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 60%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 70%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 80%; height: 100%; top: 0;"></div>
+                            <div class="grid-line vertical-pipe" style="left: 90%; height: 100%; top: 0;"></div>
+                            
+                            <!-- Horizontal lines -->
+                            <div class="grid-line horizontal-pipe" style="top: 10%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 20%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 30%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 40%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 50%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 60%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 70%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 80%; width: 100%; left: 0;"></div>
+                            <div class="grid-line horizontal-pipe" style="top: 90%; width: 100%; left: 0;"></div>
+                        </div>
+                        
+                        <!-- Reactor Core -->
+                        <div class="reactor-core">
+                            <div class="data-readout" style="top: 10px; left: 10px;">
+                                CORE TEMP: 287°C<br>
+                                PRESSURE: 155 BAR<br>
+                                ROD POS: 67%
+                            </div>
+                        </div>
+                        
+                        <!-- Cooling Towers -->
+                        <div class="cooling-tower tower-left">
+                            <div class="data-readout" style="top: -20px; left: 0;">
+                                TOWER 1<br>
+                                FLOW: 87.2%
+                            </div>
+                        </div>
+                        
+                        <div class="cooling-tower tower-right">
+                            <div class="data-readout" style="top: -20px; left: 0;">
+                                TOWER 2<br>
+                                FLOW: 92.5%
+                            </div>
+                        </div>
+                        
+                        <!-- Pipes -->
+                        <div class="pipe horizontal-pipe" style="width: 100px; top: 30%; left: 25%;"></div>
+                        <div class="pipe horizontal-pipe" style="width: 100px; top: 30%; left: 55%;"></div>
+                        <div class="pipe vertical-pipe" style="height: 150px; top: 30%; left: 25%;"></div>
+                        <div class="pipe vertical-pipe" style="height: 150px; top: 30%; left: 75%;"></div>
+                        
+                        <!-- Radiation Symbol -->
+                        <svg class="radiation-symbol" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="15" fill="none" stroke="#00ff00" stroke-width="3"/>
+                            <path d="M50,30 L50,5" stroke="#00ff00" stroke-width="10" stroke-linecap="round"/>
+                            <path d="M50,30 L67,17" stroke="#00ff00" stroke-width="10" stroke-linecap="round" transform="rotate(120 50 50)"/>
+                            <path d="M50,30 L67,17" stroke="#00ff00" stroke-width="10" stroke-linecap="round" transform="rotate(240 50 50)"/>
+                        </svg>
+                        
+                        <!-- Console Output -->
+                        <div class="console-output">
+                            > SYSTEM BOOT...<br>
+                            > DIAGNOSTICS OK<br>
+                            > CORE TEMP NOMINAL<br>
+                            > WARNING: T2 OFFLINE<br>
+                            > PRESSURE CHECK...<br>
+                            > <span class="blinking-text">AWAITING COMMAND_</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <button class="control-button">COOL</button>
+                        <span>COOLING</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="control-button">RODS</button>
+                        <span>CONTROL RODS</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="emergency-button">SCRAM</button>
+                        <span>EMERGENCY</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="control-button">TURB</button>
+                        <span>TURBINES</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="control-button">VENT</button>
+                        <span>PRESSURE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div>
+                <span id="time-display">14:32:27</span>
+                <span>OPERATOR: GUEST</span>
+            </div>
+            
+            <div>
+                <span>POWER:</span>
+                <div class="meter">
+                    <div class="meter-fill"></div>
+                </div>
+                <span id="status-display">SYSTEM OPERATIONAL</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio elements -->
+    <audio id="button-click" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="alarm-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/209/209-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="ambient-sound" preload="auto" loop>
+        <source src="https://assets.mixkit.co/active_storage/sfx/147/147-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="beep-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/1053/1053-preview.mp3" type="audio/mpeg">
+    </audio>
+    <!-- Additional ambient machine sounds -->
+    <audio id="computer-beep1" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/948/948-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="computer-beep2" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/950/950-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="computer-beep3" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2309/2309-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="computer-beep4" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2310/2310-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="data-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/688/688-preview.mp3" type="audio/mpeg">
+    </audio>
+    <!-- Emergency event sounds -->
+    <audio id="emergency-alarm1" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/1013/1013-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="emergency-alarm2" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/202/202-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="siren-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="warning-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/587/587-preview.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        // Update the time display
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('time-display').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            // Play a beep sound every minute
+            if (seconds === '00') {
+                playSound('beep-sound');
+            }
+        }
+        
+        // Function to play sounds
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play();
+            }
+        }
+        
+        // Function to play random ambient computer sounds
+        function playRandomAmbientSounds() {
+            // List of computer/machine sound IDs
+            const ambientSounds = [
+                'computer-beep1', 
+                'computer-beep2', 
+                'computer-beep3', 
+                'computer-beep4',
+                'data-sound'
+            ];
+            
+            // Play a random sound
+            const randomSound = ambientSounds[Math.floor(Math.random() * ambientSounds.length)];
+            playSound(randomSound);
+            
+            // Set volume to a lower level for ambient sounds
+            const sound = document.getElementById(randomSound);
+            if (sound) {
+                sound.volume = 0.3;
+            }
+            
+            // Schedule next random sound between 2-10 seconds
+            const nextSoundDelay = 2000 + Math.random() * 8000;
+            setTimeout(playRandomAmbientSounds, nextSoundDelay);
+        }
+        
+        // Random emergency events
+        function triggerEmergencyEvent() {
+            // Check if we're already in emergency mode
+            if (document.body.classList.contains('emergency-mode')) {
+                return;
+            }
+            
+            // Generate a random emergency type
+            const emergencyTypes = [
+                'PRESSURE CRITICAL',
+                'RADIATION LEAK DETECTED',
+                'CORE TEMPERATURE SPIKE',
+                'COOLING SYSTEM FAILURE',
+                'POWER SURGE DETECTED',
+                'CONTAINMENT BREACH',
+                'CONTROL ROD MALFUNCTION'
+            ];
+            
+            const randomEmergency = emergencyTypes[Math.floor(Math.random() * emergencyTypes.length)];
+            const statusDisplay = document.getElementById('status-display');
+            
+            // Store the original status text to restore later
+            const originalStatus = statusDisplay.textContent;
+            const originalColor = statusDisplay.style.color;
+            
+            // Update UI for emergency
+            document.body.classList.add('emergency-mode');
+            statusDisplay.textContent = `ALERT: ${randomEmergency}`;
+            statusDisplay.classList.add('status-alert');
+            
+            // Make all indicator lights flash rapidly
+            document.querySelectorAll('.indicator-light').forEach(light => {
+                light.classList.add('indicator-emergency');
+            });
+            
+            // Play emergency sounds
+            const emergencySounds = ['emergency-alarm1', 'emergency-alarm2', 'siren-sound', 'warning-sound'];
+            let soundIndex = 0;
+            
+            // Play first sound immediately
+            playSound(emergencySounds[soundIndex]);
+            
+            // Play multiple sounds during the emergency
+            const emergencyAudio = setInterval(() => {
+                soundIndex = (soundIndex + 1) % emergencySounds.length;
+                playSound(emergencySounds[soundIndex]);
+            }, 2000);
+            
+            // Add emergency text to console output
+            const consoleOutput = document.querySelector('.console-output');
+            consoleOutput.innerHTML = `> EMERGENCY ALERT<br>> ${randomEmergency}<br>> INITIATING RESPONSE<br>> SYSTEM CRITICAL<br>> AWAITING OVERRIDE<br>> <span class="blinking-text">DANGER_</span>`;
+            
+            // Restore normal operation after 10 seconds
+            setTimeout(() => {
+                document.body.classList.remove('emergency-mode');
+                statusDisplay.textContent = originalStatus;
+                statusDisplay.classList.remove('status-alert');
+                statusDisplay.style.color = originalColor;
+                
+                // Reset indicator lights
+                document.querySelectorAll('.indicator-light').forEach(light => {
+                    light.classList.remove('indicator-emergency');
+                });
+                
+                // Stop emergency sounds
+                clearInterval(emergencyAudio);
+                
+                // Reset console output
+                consoleOutput.innerHTML = `> SYSTEM RECOVERY...<br>> DIAGNOSTICS RUNNING<br>> STABILIZING SYSTEMS<br>> STATUS NORMALIZING<br>> ALERT CLEARED<br>> <span class="blinking-text">READY_</span>`;
+                
+                // Transition back to original console output after 3 seconds
+                setTimeout(() => {
+                    consoleOutput.innerHTML = `> SYSTEM BOOT...<br>> DIAGNOSTICS OK<br>> CORE TEMP NOMINAL<br>> WARNING: T2 OFFLINE<br>> PRESSURE CHECK...<br>> <span class="blinking-text">AWAITING COMMAND_</span>`;
+                }, 3000);
+                
+            }, 10000);
+        }
+        
+        // Schedule emergency events
+        function scheduleNextEmergency() {
+            // Random time between 30 seconds and 5 minutes
+            // At least one event every 5 minutes
+            const maxDelay = 5 * 60 * 1000; // 5 minutes in milliseconds
+            const minDelay = 30 * 1000; // 30 seconds in milliseconds
+            const nextDelay = minDelay + Math.random() * (maxDelay - minDelay);
+            
+            setTimeout(() => {
+                triggerEmergencyEvent();
+                scheduleNextEmergency(); // Schedule the next event
+            }, nextDelay);
+        }
+        
+        // Start ambient sound on page load
+        window.addEventListener('load', function() {
+            // Ask user to enable sounds
+            const enableSound = confirm("Enable sound effects for the nuclear control interface?");
+            if (enableSound) {
+                document.getElementById('ambient-sound').play();
+                // Start random ambient machine noises with a slight delay
+                setTimeout(playRandomAmbientSounds, 2000);
+                
+                // Add visual indication when random beeps occur
+                const indicators = document.querySelectorAll('.indicator-light');
+                document.addEventListener('audioplay', function(e) {
+                    // Make a random indicator blink when sounds play
+                    if (e.detail && e.detail.contains('beep')) {
+                        const randomIndicator = indicators[Math.floor(Math.random() * indicators.length)];
+                        randomIndicator.style.opacity = 1;
+                        setTimeout(() => {
+                            randomIndicator.style.opacity = '';
+                        }, 300);
+                    }
+                });
+                
+                // Start emergency event scheduling
+                scheduleNextEmergency();
+            }
+        });
+        
+        // Listen for audio playback for visual effects
+        HTMLAudioElement.prototype.oldPlay = HTMLAudioElement.prototype.play;
+        HTMLAudioElement.prototype.play = function() {
+            document.dispatchEvent(new CustomEvent('audioplay', {detail: this.id}));
+            this.oldPlay();
+        };
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // Add some interactive elements
+        document.querySelectorAll('.control-button, .emergency-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const statusDisplay = document.getElementById('status-display');
+                
+                // Play sound effect
+                if (this.textContent === 'SCRAM') {
+                    playSound('alarm-sound');
+                    
+                    // Trigger the emergency event for testing
+                    triggerEmergencyEvent();
+                    
+                    statusDisplay.textContent = 'EMERGENCY SHUTDOWN INITIATED';
+                    statusDisplay.style.color = '#ff0000';
+                } else {
+                    playSound('button-click');
+                    statusDisplay.textContent = `ADJUSTING ${this.textContent} SYSTEMS`;
+                    statusDisplay.style.color = '#ffff00';
+                    
+                    setTimeout(() => {
+                        statusDisplay.textContent = 'SYSTEM OPERATIONAL';
+                        statusDisplay.style.color = '#00ff00';
+                    }, 3000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
